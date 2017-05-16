@@ -31,21 +31,18 @@ import static br.com.caelum.vraptor.view.Results.status;
 
 @Controller
 public class EspetaculosController {
-	
+
 	private NumberFormat CURRENCY = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
-	
+
 	private Result result;
 	private Validator validator;
 	private Agenda agenda;
 	private DiretorioDeEstabelecimentos estabelecimentos;
 	private Estabelecimento estabelecimento;
-	
-	/** @deprecated CDI eyes only*/
-	protected EspetaculosController() {
-	}
 
 	@Inject
-	public EspetaculosController(Result result, Validator validator, Agenda agenda, DiretorioDeEstabelecimentos estabelecimentos) {
+	public EspetaculosController(Result result, Validator validator, Agenda agenda,
+			DiretorioDeEstabelecimentos estabelecimentos) {
 		this.result = result;
 		this.validator = validator;
 		this.agenda = agenda;
@@ -75,7 +72,7 @@ public class EspetaculosController {
 		agenda.cadastra(espetaculo);
 		result.redirectTo(this).lista();
 	}
-	
+
 	@Get("/espetaculo/{espetaculoId}/sessoes")
 	public void sessoes(Long espetaculoId) {
 		Espetaculo espetaculo = carregaEspetaculo(espetaculoId);
@@ -84,7 +81,8 @@ public class EspetaculosController {
 	}
 
 	@Post("/espetaculo/{espetaculoId}/sessoes")
-	public void cadastraSessoes(Long espetaculoId, LocalDate inicio, LocalDate fim, LocalTime horario, Periodicidade periodicidade) {
+	public void cadastraSessoes(Long espetaculoId, LocalDate inicio, LocalDate fim, LocalTime horario,
+			Periodicidade periodicidade) {
 		Espetaculo espetaculo = carregaEspetaculo(espetaculoId);
 
 		// aqui faz a magica!
@@ -96,7 +94,7 @@ public class EspetaculosController {
 		result.include("message", sessoes.size() + " sessões criadas com sucesso");
 		result.redirectTo(this).lista();
 	}
-	
+
 	@Get("/sessao/{id}")
 	public void sessao(Long id) {
 		Sessao sessao = agenda.sessao(id);
@@ -106,8 +104,9 @@ public class EspetaculosController {
 
 		result.include("sessao", sessao);
 	}
-	
-	@Post @Path("/sessao/{sessaoId}/reserva")
+
+	@Post
+	@Path("/sessao/{sessaoId}/reserva")
 	public void reserva(Long sessaoId, final Integer quantidade) {
 		Sessao sessao = agenda.sessao(sessaoId);
 		if (sessao == null) {
@@ -117,9 +116,7 @@ public class EspetaculosController {
 
 		if (quantidade < 1) {
 			validator.add(new SimpleMessage("", "Você deve escolher um lugar ou mais"));
-		}
-
-		if (!sessao.podeReservar(quantidade)) {
+		} else if (!sessao.podeReservar(quantidade)) {
 			validator.add(new SimpleMessage("", "Não existem ingressos disponíveis"));
 		}
 
@@ -148,5 +145,5 @@ public class EspetaculosController {
 	private Estabelecimento criaEstabelecimento(Long id) {
 		return estabelecimentos.todos().get(0);
 	}
-	
+
 }
